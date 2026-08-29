@@ -1,0 +1,43 @@
+{
+  "apps": [
+    {
+      "id": "psn-trophy-tracker",
+      "name": "PSN Trophies",
+      "bundleId": "com.dylan.psntrophytracker",
+      "icon": "gamecontroller.fill",
+      "accent": "#0070d1",
+      "github": {
+        "owner": "PixamRose",
+        "repo": "PSNTrophyTracker",
+        "artifact": "PSNTrophyTracker-ipa",
+        "ipaFileName": "PSNTrophyTracker.ipa"
+      }
+    },
+    {
+      "id": "network-radar",
+      "name": "Network Radar",
+      "bundleId": "com.dylan.networkradar",
+      "icon": "dot.radiowaves.left.and.right",
+      "accent": "#33d6ff",
+      "github": {
+        "owner": "PixamRose",
+        "repo": "NetworkRadar",
+        "artifact": "NetworkRadar-ipa",
+        "ipaFileName": "NetworkRadar.ipa"
+      }
+    },
+    {
+      "id": "sideload-hub",
+      "name": "SideloadHub",
+      "bundleId": "com.dylan.sideloadhub",
+      "icon": "server.rack",
+      "accent": "#d959ff",
+      "github": {
+        "owner": "PixamRose",
+        "repo": "SideloadHub",
+        "artifact": "SideloadHub-ipa",
+        "ipaFileName": "SideloadHub.ipa"
+      }
+    }
+  ]
+}
