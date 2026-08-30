@@ -124,7 +124,13 @@ foreach ($app in $config.apps) {
             Write-Host "  OK $($app.name)" -ForegroundColor Green
         }
         catch {
-            Write-Host "  ERREUR $($app.name): $_" -ForegroundColor Red
+            $detail = "$_"
+            if ($detail -match '404|Not Found') {
+                Write-Host "  ERREUR $($app.name): repo prive ou token sans acces (404)" -ForegroundColor Red
+                Write-Host '  -> Ajoute PSNTrophyTracker au token GitHub (repo prive)' -ForegroundColor Yellow
+            } else {
+                Write-Host "  ERREUR $($app.name): $_" -ForegroundColor Red
+            }
             if (-not (Test-Path $ipaPath)) { continue }
             Write-Host '  -> IPA local conserve' -ForegroundColor Yellow
         }

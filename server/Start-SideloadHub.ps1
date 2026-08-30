@@ -337,14 +337,31 @@ $config = Read-Config
 $catalog = Get-AppCatalog -Config $config
 $localIP = Get-LocalIPv4
 if (-not $localIP) { $localIP = "127.0.0.1" }
-$baseUrl = "http://${localIP}:$Port/"
 
-$listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Any, $Port)
-try { $listener.Start() }
-catch {
-    Write-Host "Port $Port indisponible. Essaie -Port 9080" -ForegroundColor Red
+$listener = $null
+$activePort = $Port
+foreach ($candidatePort in @($Port, 9080, 9876, 8777)) {
+    $tryListener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Any, $candidatePort)
+    try {
+        $tryListener.Start()
+        $listener = $tryListener
+        $activePort = $candidatePort
+        if ($candidatePort -ne $Port) {
+            Write-Host "Port $Port occupe -> utilisation du port $activePort" -ForegroundColor Yellow
+        }
+        break
+    }
+    catch {
+        $tryListener = $null
+    }
+}
+
+if (-not $listener) {
+    Write-Host "Aucun port disponible (8765, 9080, 9876, 8777). Ferme l ancienne fenetre LAN-HUB." -ForegroundColor Red
     exit 1
 }
+
+$baseUrl = "http://${localIP}:$activePort/"
 
 Clear-Host
 Write-Host ''
