@@ -47,23 +47,64 @@ function Get-AppCatalog {
             $meta = Get-Content $metaPath -Raw | ConvertFrom-Json
         }
 
-        $apps += [ordered]@{
+        $entry = [ordered]@{
             id = $app.id
             name = $app.name
             bundleId = $app.bundleId
             icon = $app.icon
             accent = $app.accent
-            version = if ($meta.version) { $meta.version } else { "?" }
+            version = if ($meta.version) { "$($meta.version)" } else { "?" }
             build = if ($meta.buildNumber) { "$($meta.buildNumber)" } else { "?" }
-            sizeBytes = $file.Length
+            sizeBytes = [int64]$file.Length
             updatedAt = $file.LastWriteTimeUtc.ToString("o")
             downloadPath = "/api/v1/apps/$($app.id)/download"
             webPath = "/apps/$($app.id)"
-            commit = $meta.commit
-            message = $meta.message
         }
+        if ($meta.commit) { $entry.commit = "$($meta.commit)" }
+        if ($meta.message) { $entry.message = "$($meta.message)" }
+        $apps += $entry
     }
-    return $apps
+    return ,$apps
+}
+
+function ConvertTo-JsonArray {
+    param(
+        [array]$Items,
+        [int]$Depth = 6
+    )
+
+    if (-not $Items -or $Items.Count -eq 0) {
+        return "[]"
+    }
+
+    $parts = @()
+    foreach ($item in $Items) {
+        $parts += (ConvertTo-Json $item -Depth $Depth -Compress)
+    }
+    return "[" + ($parts -join ",") + "]"
+}
+
+function Get-JsonBody {
+    param([object]$Data)
+    $json = $Data | ConvertTo-Json -Depth 8 -Compress
+    [System.Text.Encoding]::UTF8.GetBytes($json)
+}
+
+function Get-CatalogJsonBody {
+    param(
+        [array]$Catalog,
+        [string]$BaseUrl
+    )
+
+    $serverJson = (@{
+        name = "SideloadHub"
+        version = $serverVersion
+        baseUrl = $BaseUrl
+    } | ConvertTo-Json -Compress)
+
+    $appsJson = ConvertTo-JsonArray -Items $Catalog -Depth 8
+    $json = "{`"server`":$serverJson,`"apps`":$appsJson}"
+    [System.Text.Encoding]::UTF8.GetBytes($json)
 }
 
 function Send-HttpResponse {
@@ -226,14 +267,7 @@ function Handle-Client {
         }
 
         if ($path -eq "/api/v1/catalog") {
-            $body = Get-JsonBody @{
-                server = @{
-                    name = "SideloadHub"
-                    version = $serverVersion
-                    baseUrl = $BaseUrl
-                }
-                apps = $catalog
-            }
+            $body = Get-CatalogJsonBody -Catalog $catalog -BaseUrl $BaseUrl
             Send-HttpResponse -Stream $stream -StatusCode 200 -StatusText "OK" -ContentType "application/json; charset=utf-8" -Body $body
             return
         }
