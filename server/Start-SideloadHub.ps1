@@ -114,7 +114,7 @@ function Build-DashboardHtml {
       <div class="icon" style="background:$($app.accent)22;color:$($app.accent)">⬇</div>
       <div>
         <h2>$($app.name)</h2>
-        <p>v$($app.version) · $sizeMB Mo</p>
+        <p>v$($app.version) · $($sizeMB) MB</p>
       </div>
     </a>
 "@
@@ -181,8 +181,8 @@ function Build-AppPageHtml {
 <body>
   <div class="card">
     <h1>$($App.name)</h1>
-    <p>Version $($App.version) · $sizeMB Mo</p>
-    <a class="btn" href="$DownloadUrl">Télécharger l'IPA</a>
+    <p>Version $($App.version) · $($sizeMB) MB</p>
+    <a class="btn" href="$DownloadUrl">Telecharger l IPA</a>
     <p style="margin-top:16px;font-size:.85rem">Ouvre ensuite avec AltStore ou transfère vers Sideloadly.</p>
   </div>
 </body>
@@ -313,26 +313,27 @@ catch {
 }
 
 Clear-Host
-Write-Host ""
-Write-Host "  ============================================" -ForegroundColor Magenta
-Write-Host "     SideloadHub — Serveur LAN" -ForegroundColor Magenta
-Write-Host "  ============================================" -ForegroundColor Magenta
-Write-Host ""
-Write-Host "  URL iPhone / navigateur:" -ForegroundColor White
+Write-Host ''
+Write-Host '  ============================================' -ForegroundColor Magenta
+Write-Host '     SideloadHub - Serveur LAN' -ForegroundColor Magenta
+Write-Host '  ============================================' -ForegroundColor Magenta
+Write-Host ''
+Write-Host '  URL iPhone / navigateur:' -ForegroundColor White
 Write-Host "  $baseUrl" -ForegroundColor Green
-Write-Host ""
-Write-Host "  API catalog:" -ForegroundColor White
+Write-Host ''
+Write-Host '  API catalog:' -ForegroundColor White
 Write-Host "  ${baseUrl}api/v1/catalog" -ForegroundColor Green
-Write-Host ""
+Write-Host ''
 Write-Host "  Apps disponibles: $($catalog.Count)" -ForegroundColor Cyan
 foreach ($app in $catalog) {
     $sizeMB = [math]::Round($app.sizeBytes / 1MB, 1)
-    Write-Host ("    - {0} v{1} ({2} Mo)" -f $app.name, $app.version, $sizeMB) -ForegroundColor DarkGray
+    $line = '    - {0} v{1} ({2} MB)' -f $app.name, $app.version, $sizeMB
+    Write-Host $line -ForegroundColor DarkGray
 }
-Write-Host ""
-Write-Host "  Connecte l'app SideloadHub sur iPhone avec cette IP." -ForegroundColor Yellow
-Write-Host "  Ctrl+C pour arreter" -ForegroundColor Yellow
-Write-Host ""
+Write-Host ''
+Write-Host '  Connecte l app SideloadHub sur iPhone avec cette IP.' -ForegroundColor Yellow
+Write-Host '  Ctrl+C pour arreter' -ForegroundColor Yellow
+Write-Host ''
 
 try {
     while ($true) {
