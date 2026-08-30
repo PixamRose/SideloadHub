@@ -78,6 +78,28 @@ final class HubViewModel: ObservableObject {
         downloadService.download(app: app, from: url)
     }
 
+    func install(_ app: HubAppItem) {
+        guard let baseURL = activeBaseURL,
+              let ipaURL = HubClient.downloadURL(baseURL: baseURL, app: app) else {
+            errorMessage = "URL de téléchargement invalide"
+            return
+        }
+
+        if InstallHelper.openInAltStore(ipaURL: ipaURL) {
+            errorMessage = nil
+            return
+        }
+
+        if !InstallHelper.canOpenAltStore() {
+            errorMessage = "AltStore requis : installe AltStore + AltServer sur le PC, puis reessaie."
+            _ = InstallHelper.openHubPage(baseURL: baseURL, app: app)
+        } else {
+            errorMessage = "Impossible d ouvrir AltStore. Telechargement local lance."
+        }
+
+        download(app)
+    }
+
     func markInstalled(_ app: HubAppItem) {
         SideloadTracker.recordInstall(bundleId: app.bundleId)
         objectWillChange.send()

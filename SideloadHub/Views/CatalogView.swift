@@ -69,49 +69,55 @@ struct AppCatalogCard: View {
     }
 
     var body: some View {
-        Button {
-            viewModel.selectedApp = app
-        } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(HubTheme.color(from: app.accent).opacity(0.18))
-                        .frame(width: 52, height: 52)
-                    Image(systemName: app.icon)
-                        .foregroundStyle(HubTheme.color(from: app.accent))
-                }
+        HStack(spacing: 14) {
+            Button {
+                viewModel.selectedApp = app
+            } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(HubTheme.color(from: app.accent).opacity(0.18))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: app.icon)
+                            .foregroundStyle(HubTheme.color(from: app.accent))
+                    }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(app.name).font(.headline).foregroundStyle(.white)
-                    Text("v\(app.version) · \(app.sizeLabel)")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.55))
-                    Text(viewModel.expiryLabel(for: app))
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(expiryColor)
-                }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(app.name).font(.headline).foregroundStyle(.white)
+                        Text("v\(app.version) · \(app.sizeLabel)")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.55))
+                        Text(viewModel.expiryLabel(for: app))
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(expiryColor)
+                    }
 
-                Spacer()
+                    Spacer()
 
-                if let download, download.state == .downloading {
-                    ProgressView(value: download.progress)
-                        .frame(width: 36)
-                } else if download?.state == .finished {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(HubTheme.success)
-                } else {
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.white.opacity(0.35))
                 }
             }
-            .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(HubTheme.cardFill)
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(HubTheme.cardStroke, lineWidth: 1))
-            )
+            .buttonStyle(.plain)
+
+            Button {
+                viewModel.install(app)
+            } label: {
+                Image(systemName: "arrow.down.app.fill")
+                    .font(.title2)
+                    .foregroundStyle(HubTheme.accent)
+                    .frame(width: 44, height: 44)
+                    .background(HubTheme.accent.opacity(0.15))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(HubTheme.cardFill)
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(HubTheme.cardStroke, lineWidth: 1))
+        )
     }
 
     private var expiryColor: Color {

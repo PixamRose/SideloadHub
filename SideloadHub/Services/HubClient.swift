@@ -72,4 +72,11 @@ enum HubClient {
         }
         return endpointURL(baseURL: baseURL, path: app.downloadPath)
     }
+
+    static func webPageURL(baseURL: URL, app: HubAppItem) -> URL? {
+        if app.webPath.hasPrefix("http") {
+            return URL(string: app.webPath)
+        }
+        return endpointURL(baseURL: baseURL, path: app.webPath)
+    }
 }

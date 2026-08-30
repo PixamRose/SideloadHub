@@ -5,10 +5,12 @@ struct AppDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     let app: HubAppItem
 
-    @State private var showShare = false
-
     private var download: AppDownloadProgress? {
         viewModel.downloadService.downloads[app.id]
+    }
+
+    private var hasAltStore: Bool {
+        InstallHelper.canOpenAltStore()
     }
 
     var body: some View {
@@ -31,12 +33,6 @@ struct AppDetailSheet: View {
                                 Text(app.sizeLabel)
                                     .font(.caption)
                                     .foregroundStyle(.white.opacity(0.45))
-                                if let message = app.message {
-                                    Text(message)
-                                        .font(.caption)
-                                        .foregroundStyle(.white.opacity(0.45))
-                                        .lineLimit(3)
-                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -47,7 +43,7 @@ struct AppDetailSheet: View {
                                     .font(.headline)
                                 Text(viewModel.expiryLabel(for: app))
                                     .foregroundStyle(HubTheme.warning)
-                                Button("Marquer comme installée aujourd'hui") {
+                                Button("Marquer comme installee aujourd hui") {
                                     viewModel.markInstalled(app)
                                 }
                                 .font(.caption.weight(.semibold))
@@ -62,10 +58,10 @@ struct AppDetailSheet: View {
                                     switch download.state {
                                     case .downloading:
                                         ProgressView(value: download.progress)
-                                        Text("\(Int(download.progress * 100))%")
+                                        Text("Telechargement secours \(Int(download.progress * 100))%")
                                             .font(.caption)
                                     case .finished:
-                                        Label("Téléchargement terminé", systemImage: "checkmark.circle.fill")
+                                        Label("Copie locale prete", systemImage: "checkmark.circle.fill")
                                             .foregroundStyle(HubTheme.success)
                                     case .failed:
                                         Text(download.errorMessage ?? "Erreur")
@@ -78,45 +74,44 @@ struct AppDetailSheet: View {
                         }
 
                         Button {
-                            viewModel.download(app)
+                            viewModel.install(app)
                         } label: {
-                            Label("Télécharger l'IPA", systemImage: "arrow.down.circle.fill")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(HubTheme.accentGradient)
-                                .foregroundStyle(.black.opacity(0.85))
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                            Label(
+                                hasAltStore ? "Mettre a jour (AltStore)" : "Installer",
+                                systemImage: "arrow.down.app.fill"
+                            )
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(HubTheme.accentGradient)
+                            .foregroundStyle(.black.opacity(0.85))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
 
                         if download?.state == .finished, let url = download?.localFileURL {
                             ShareLink(item: url, preview: SharePreview(app.name, image: Image(systemName: app.icon))) {
-                                Label("Partager / Ouvrir avec AltStore", systemImage: "square.and.arrow.up")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 14)
-                                    .background(Color.white.opacity(0.10))
-                                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                            }
-
-                            Button {
-                                viewModel.markInstalled(app)
-                            } label: {
-                                Label("J'ai installé — reset 7 jours", systemImage: "calendar.badge.clock")
+                                Label("Partager IPA (Sideloadly)", systemImage: "square.and.arrow.up")
                                     .font(.subheadline.weight(.semibold))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
+                                    .background(Color.white.opacity(0.10))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
                             }
-                            .foregroundStyle(HubTheme.success)
                         }
 
                         HubGlassCard {
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Installation")
+                                Text("Installation auto")
                                     .font(.headline)
-                                Text("1. Télécharge l'IPA\n2. Partage → AltStore (si AltServer tourne sur le PC)\n3. Ou ouvre Safari sur le PC hub pour Sideloadly WiFi/USB")
-                                    .font(.caption)
-                                    .foregroundStyle(.white.opacity(0.55))
+                                if hasAltStore {
+                                    Text("1. AltServer doit tourner sur ton PC (icone barre des taches)\n2. Appuie sur Mettre a jour\n3. AltStore telecharge depuis le hub LAN et installe")
+                                        .font(.caption)
+                                        .foregroundStyle(.white.opacity(0.55))
+                                } else {
+                                    Text("Installe AltStore sur iPhone + AltServer sur Windows pour installer en 1 tap depuis le reseau local.")
+                                        .font(.caption)
+                                        .foregroundStyle(HubTheme.warning.opacity(0.9))
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -124,7 +119,7 @@ struct AppDetailSheet: View {
                     .padding(20)
                 }
             }
-            .navigationTitle("Mise à jour")
+            .navigationTitle("Mise a jour")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
