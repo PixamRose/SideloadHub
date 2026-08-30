@@ -126,11 +126,11 @@ foreach ($app in $config.apps) {
         catch {
             Write-Host "  ERREUR $($app.name): $_" -ForegroundColor Red
             if (-not (Test-Path $ipaPath)) { continue }
-            Write-Host "  -> IPA local conserve" -ForegroundColor Yellow
+            Write-Host '  -> IPA local conserve' -ForegroundColor Yellow
         }
     }
     elseif (-not (Test-Path $ipaPath)) {
-        Write-Host "  SKIP $($app.name) — pas de token et pas d'IPA local" -ForegroundColor Yellow
+        Write-Host ('  SKIP {0} - pas de token et pas d IPA local' -f $app.name) -ForegroundColor Yellow
         continue
     }
 
